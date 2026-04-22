@@ -1252,6 +1252,7 @@
     "share-recipe": "Share Recipe",
     "default-30-days": "Default 30 Days",
     "expires-at": "Expires At",
+    "never-expires": "Never expires",
     "recipe-link-copied-message": "Recipe link copied to clipboard"
   },
   "banner-experimental": {

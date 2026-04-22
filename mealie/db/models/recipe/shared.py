@@ -27,7 +27,7 @@ class RecipeShareTokenModel(SqlAlchemyBase, BaseMixins):
     recipe_id: Mapped[GUID] = mapped_column(GUID, sa.ForeignKey("recipes.id"), nullable=False, index=True)
     recipe: Mapped["RecipeModel"] = sa.orm.relationship("RecipeModel", back_populates="share_tokens", uselist=False)
 
-    expires_at: Mapped[datetime] = mapped_column(NaiveDateTime, nullable=False)
+    expires_at: Mapped[datetime | None] = mapped_column(NaiveDateTime, nullable=True)
 
     @auto_init()
     def __init__(self, **_) -> None:

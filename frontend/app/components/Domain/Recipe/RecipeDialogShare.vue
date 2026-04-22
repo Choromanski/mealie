@@ -7,6 +7,7 @@
     >
       <v-card-text>
         <v-menu
+          v-if="!neverExpires"
           v-model="datePickerMenu"
           :close-on-content-click="false"
           transition="scale-transition"
@@ -33,6 +34,12 @@
             @update:model-value="datePickerMenu = false"
           />
         </v-menu>
+        <v-checkbox
+          v-model="neverExpires"
+          :label="$t('recipe-share.never-expires')"
+          hide-details
+          class="mt-2"
+        />
       </v-card-text>
       <v-card-actions class="justify-end">
         <BaseButton
@@ -59,7 +66,11 @@
 
           <div class="pl-3 flex-grow-1">
             <v-list-item-title>
-              {{ $t("recipe-share.expires-at") + ' ' + $d(new Date(token.expiresAt!), "short") }}
+              {{
+                token.expiresAt != null
+                  ? $t("recipe-share.expires-at") + ' ' + $d(new Date(token.expiresAt), "short")
+                  : $t("recipe-share.never-expires")
+              }}
             </v-list-item-title>
           </div>
 
@@ -105,6 +116,7 @@ const props = defineProps<Props>();
 const dialog = defineModel<boolean>({ default: false });
 
 const datePickerMenu = ref(false);
+const neverExpires = ref(false);
 const expirationDate = ref(new Date(Date.now() - new Date().getTimezoneOffset() * 60000));
 const tokens = ref<RecipeShareToken[]>([]);
 
@@ -112,6 +124,7 @@ whenever(
   () => dialog.value,
   () => {
     // Set expiration date to today + 30 Days
+    neverExpires.value = false;
     const today = new Date();
     expirationDate.value = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     refreshTokens();
@@ -135,10 +148,11 @@ const userApi = useUserApi();
 
 async function createNewToken() {
   // Convert expiration date to timestamp
-  const { data } = await userApi.recipes.share.createOne({
-    recipeId: props.recipeId,
-    expiresAt: expirationDate.value.toISOString(),
-  });
+  const payload = neverExpires.value
+    ? { recipeId: props.recipeId }
+    : { recipeId: props.recipeId, expiresAt: expirationDate.value.toISOString() };
+
+  const { data } = await userApi.recipes.share.createOne(payload);
 
   if (data) {
     tokens.value.push(data);

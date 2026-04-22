@@ -16,10 +16,12 @@ def defaut_expires_at_time() -> datetime:
 
 class RecipeShareTokenCreate(MealieModel):
     recipe_id: UUID4
-    expires_at: datetime = Field(default_factory=defaut_expires_at_time)
+    expires_at: datetime | None = Field(default_factory=defaut_expires_at_time)
 
     @property
     def is_expired(self) -> bool:
+        if self.expires_at is None:
+            return False
         return self.expires_at < datetime.now(UTC)
 
 
